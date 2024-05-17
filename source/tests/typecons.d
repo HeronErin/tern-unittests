@@ -6,8 +6,35 @@ class A
 {
     int a;
 }
+struct B
+{
+    Nullable!A a;
+}
+unittest
+{
+    B b;
+    b.a = null;
+    assert(b.a == null);  //FAILS
+}
 
-unittest 
+
+debug Nullable!A foo(bool notNull)
+{
+    if (notNull)
+        return nullable!A(new A());
+    return nullable!A(null);
+}
+debug Nullable!(A[]) bar(bool notNull){
+    if (notNull){
+        A[] aArr = new A[4];
+        return nullable(aArr);
+    }
+    
+    return nullable!(A[])(null);
+}
+
+
+unittest
 {
     Nullable!uint a;
     assert(a == null);
@@ -30,7 +57,13 @@ unittest
     assert(g == null);
 
     Nullable!(short*) c = cast(short*)&a;
-    assert(c[0] == cast(const(short))4);
+    assert(c[0] == cast(const(short)) 4);
+
+    assert(foo(true) != null);
+    assert(foo(false) == null);
+
+    assert(bar(true) != null);
+    assert(bar(false) == null);
 }
 
 unittest
@@ -46,7 +79,7 @@ unittest
     auto c = atomic([1, 2, 3]);
     c[0] = c[0] + 1;
     assert(c[0] == 2);
-    assert(c[0..$] == cast(shared(int[]))[2, 2, 3]);
+    assert(c[0 .. $] == cast(shared(int[]))[2, 2, 3]);
 }
 
 unittest
